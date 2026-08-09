@@ -11,7 +11,7 @@ dotenv.config();
 
 // Task 2: Initialize the Express server
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3050;
 
 app.use(express.json());
 app.use(expressPinoLogger({ logger: logger }));

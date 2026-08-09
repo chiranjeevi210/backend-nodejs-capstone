@@ -20,8 +20,7 @@ app.use(pinoHttp({ logger: pinoLogger })); // Essential to log requests before r
 const searchRoutes = require('./routes/searchRoutes');
 
 // authRoutes Step 2: import the authRoutes and store in a constant called authRoutes
-// const authRoutes = require('./routes/authRoutes'); // (Uncomment when you reach this lab step)
-
+const authRoutes = require('./routes/authRoutes'); 
 // Items API Task 1: import the secondChanceItemsRoutes and store in a constant called secondChanceItemsRoutes
 // const secondChanceItemsRoutes = require('./routes/secondChanceItemsRoutes'); // (Uncomment when you reach this lab step)
 
@@ -31,8 +30,7 @@ const searchRoutes = require('./routes/searchRoutes');
 app.use('/api/secondchance/search', searchRoutes);
 
 // authRoutes Step 2: add the authRoutes to the server by using the app.use() method.
-// app.use('/api/auth', authRoutes); // (Uncomment when you reach this lab step)
-
+app.use('/api/auth', authRoutes); 
 // Items API Task 2: add the secondChanceItemsRoutes to the server by using the app.use() method.
 // app.use('/api/secondchance/items', secondChanceItemsRoutes); // (Uncomment when you reach this lab step)
 

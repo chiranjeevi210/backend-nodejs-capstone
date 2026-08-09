@@ -1,57 +1,66 @@
-require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
+const dotenv = require('dotenv');
 const logger = require('./logger');
-const expressPino = require('express-pino-logger')({ logger });
-// Task 1: import the natural library
-const natural = {{insert code here}}
+const expressPinoLogger = require('express-pino-logger');
 
-// Task 2: initialize the express server
-{{insert code here}}
+// Task 1: Import the Natural library
+const natural = require('natural');
+
+dotenv.config();
+
+// Task 2: Initialize the Express server
+const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(expressPino);
+app.use(expressPinoLogger({ logger: logger }));
 
-// Define the sentiment analysis route
-// Task 3: create the POST /sentiment analysis
-app.{{insert method here}}('{{insert route here}}', async (req, res) => {
-
-    // Task 4: extract the sentence parameter
-    const { sentence } = {{insert code here}};
-
-
-    if (!sentence) {
-        logger.error('No sentence provided');
-        return res.status(400).json({ error: 'No sentence provided' });
-    }
-
-    // Initialize the sentiment analyzer with the Natural's PorterStemmer and "English" language
-    const Analyzer = natural.SentimentAnalyzer;
-    const stemmer = natural.PorterStemmer;
-    const analyzer = new Analyzer("English", stemmer, "afinn");
-
-    // Perform sentiment analysis
+// Task 3: Create a POST /sentiment endpoint
+app.post('/sentiment', async (req, res) => {
     try {
-        const analysisResult = analyzer.getSentiment(sentence.split(' '));
+        // Task 4: Extract the sentence parameter from the request body
+        const { sentence } = req.body;
 
-        let sentiment = "neutral";
+        if (!sentence || sentence.trim() === "") {
+            logger.error("No sentence provided in request body");
+            return res.status(400).json({ error: "Sentence parameter is required inside the request body." });
+        }
 
-        // Task 5: set sentiment to negative or positive based on score rules
-        {{insert code here}}
+        // Initialize Natural's Sentiment Analyzer
+        const Analyzer = natural.SentimentAnalyzer;
+        const stemmer = natural.PorterStemmer;
+        const analyzer = new Analyzer("English", stemmer, "afinn");
 
-        // Logging the result
-        logger.info(`Sentiment analysis result: ${analysisResult}`);
+        // Tokenize the input string sentence into individual clean words
+        const tokenizer = new natural.WordTokenizer();
+        const words = tokenizer.tokenize(sentence);
 
-        // Task 6: send a status code of 200 with both sentiment score and the sentiment txt in the format { sentimentScore: analysisResult, sentiment: sentiment }
-        {{insert code here}}
+        // Calculate the raw sentiment metric score
+        const score = analyzer.getSentiment(words);
+
+        // Task 5: Process the response by assigning classification tiers
+        let sentiment = 'positive';
+        if (score < 0) {
+            sentiment = 'negative';
+        } else if (score >= 0 && score <= 0.33) {
+            sentiment = 'neutral';
+        }
+
+        // Task 6: Implement success return state
+        logger.info(`Successfully analyzed sentiment. Score: ${score}, Label: ${sentiment}`);
+        return res.status(200).json({ 
+            sentimentScore: parseFloat(score.toFixed(2)), 
+            sentiment: sentiment 
+        });
+
     } catch (error) {
-        logger.error(`Error performing sentiment analysis: ${error}`);
-        // Task 7: if there is an error, return a HTTP code of 500 and the json {'message': 'Error performing sentiment analysis'}
-        {{insert code here}}
+        // Task 7: Implement error return state
+        logger.error(`Error during sentiment process analysis execution: ${error.message}`);
+        return res.status(500).json({ error: "Internal server error during sentiment analysis execution." });
     }
 });
 
 app.listen(port, () => {
-    logger.info(`Server running on port ${port}`);
+    logger.info(`Sentiment service running smoothly on port ${port}`);
 });
